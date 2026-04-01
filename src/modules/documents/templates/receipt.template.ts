@@ -6,6 +6,7 @@ export function buildReceiptHtml(
   dto: CreateReceiptDto,
   totals: Totals,
   utils: TemplateUtils,
+  logoDataUrl: string | null = null,
 ) {
   const { subtotal, tax, total } = totals;
   const { escapeHtml, formatCurrency } = utils;
@@ -124,6 +125,17 @@ export function buildReceiptHtml(
             font-size: 12px;
             color: #777;
           }
+          .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+          }
+
+          .logo {
+            max-height: 60px;
+            max-width: 180px;
+            object-fit: contain;
+          }
         </style>
       </head>
 
@@ -131,7 +143,11 @@ export function buildReceiptHtml(
         <div class="receipt-box">
 
           <div class="header">
-            <div class="title">RECEIPT</div>
+            <div class="header-left">
+              ${logoDataUrl ? `<img src="${logoDataUrl}" class="logo" alt="Logo" />` : ''}
+              <div class="title">RECEIPT</div>
+            </div>
+            
             <div class="status">PAID</div>
           </div>
 

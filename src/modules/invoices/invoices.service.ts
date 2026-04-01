@@ -9,7 +9,12 @@ export class InvoicesService {
 
   async generateInvoice(dto: CreateInvoiceDto) {
     const totals = this.documentService.calculateTotals(dto.items, dto.taxRate);
-    const html = buildInvoiceHtml(dto, totals, this.documentService.utils);
+    const html = buildInvoiceHtml(
+      dto,
+      totals,
+      this.documentService.utils,
+      this.documentService.logoDataUrl,
+    );
 
     const pdfBuffer = await this.documentService.generatePdf(html);
     return { pdfBuffer, ...totals };

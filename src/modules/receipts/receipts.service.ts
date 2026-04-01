@@ -9,7 +9,12 @@ export class ReceiptsService {
 
   async generateReceipt(dto: CreateReceiptDto) {
     const totals = this.documentService.calculateTotals(dto.items, dto.taxRate);
-    const html = buildReceiptHtml(dto, totals, this.documentService.utils);
+    const html = buildReceiptHtml(
+      dto,
+      totals,
+      this.documentService.utils,
+      this.documentService.logoDataUrl,
+    );
 
     const pdfBuffer = await this.documentService.generatePdf(html);
     return { pdfBuffer, ...totals };

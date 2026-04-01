@@ -5,6 +5,7 @@ export function buildInvoiceHtml(
   dto: CreateInvoiceDto,
   totals: Totals,
   utils: TemplateUtils,
+  logoDataUrl: string | null = null,
 ) {
   const { subtotal, tax, total } = totals;
   const { escapeHtml, formatCurrency } = utils;
@@ -115,6 +116,17 @@ export function buildInvoiceHtml(
             color: #888;
             text-align: center;
           }
+          .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+          }
+
+          .logo {
+            max-height: 60px;
+            max-width: 180px;
+            object-fit: contain;
+          }
         </style>
       </head>
 
@@ -122,7 +134,10 @@ export function buildInvoiceHtml(
         <div class="invoice-box">
           
           <div class="header">
-            <div class="title">INVOICE</div>
+            <div class="header-left">
+              ${logoDataUrl ? `<img src="${logoDataUrl}" class="logo" alt="Logo" />` : ''}
+              <div class="title">INVOICE</div>
+            </div>
             <div class="meta">
               <div><strong>Date:</strong> ${today}</div>
               <div><strong>Invoice #:</strong> ${Math.floor(Math.random() * 100000)}</div>

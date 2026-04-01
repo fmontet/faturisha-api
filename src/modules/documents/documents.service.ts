@@ -1,16 +1,31 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import puppeteer, { Browser } from 'puppeteer';
 import { CalculableItem, createTemplateUtils } from './definitions';
+import { join } from 'path';
+import { readFile } from 'fs/promises';
 
 @Injectable()
 export class DocumentsService implements OnModuleInit, OnModuleDestroy {
   private browser: Browser;
+  public logoDataUrl: string | null = null;
 
   async onModuleInit() {
     this.browser = await puppeteer.launch({
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
+
+    try {
+      const logoBuffer = await readFile(
+        join(__dirname, '..', '..', 'assets', 'sample-logo.png'),
+      );
+      this.logoDataUrl = `data:image/png;base64,${logoBuffer.toString('base64')}`;
+      console.log('Logo loaded successfully');
+    } catch {
+      // No logo found — templates will render without it
+      this.logoDataUrl = null;
+      console.log('No logo found, proceeding without it');
+    }
   }
 
   async onModuleDestroy() {
