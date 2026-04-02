@@ -1,6 +1,5 @@
 import { Totals, TemplateUtils } from '../definitions';
 import { CreateReceiptDto } from '../../receipts/dto/create-receipt.dto';
-import { AddressDto } from '../dto/base-document.dto';
 
 export function buildReceiptHtml(
   dto: CreateReceiptDto,
@@ -9,27 +8,13 @@ export function buildReceiptHtml(
   logoDataUrl: string | null = null,
 ) {
   const { subtotal, tax, total } = totals;
-  const { escapeHtml, formatCurrency } = utils;
+  const { escapeHtml, formatCurrency, formatAddress } = utils;
 
   const e = escapeHtml;
   const fmt = formatCurrency;
 
   const today = new Date().toLocaleDateString();
 
-  const renderAddress = (name: string, address?: AddressDto): string => {
-    const lines = [
-      `<div>${e(name)}</div>`,
-      address?.addressLine1
-        ? `<div>${e(address.addressLine1)} ${e(address.addressLine2 ?? '')}</div>`
-        : '',
-      address?.city ? `<div>${e(address.city)}</div>` : '',
-      address?.country
-        ? `<div>${e(address.country)} ${e(address.postalCode ?? '')}</div>`
-        : '',
-    ];
-
-    return lines.filter(Boolean).join('\n');
-  };
   return `
     <!DOCTYPE html>
     <html>
@@ -163,12 +148,12 @@ export function buildReceiptHtml(
 
           <div class="section">
             <div class="section-title">Received From</div>
-            ${renderAddress(dto.buyerName, dto.buyerAddress)}
+            ${formatAddress(dto.buyerName, dto.buyerAddress)}
           </div>
 
           <div class="section">
             <div class="section-title">Paid To</div>
-            <div>${e(dto.sellerName)}</div>
+            ${formatAddress(dto.sellerName, dto.sellerAddress)}
           </div>
 
           ${

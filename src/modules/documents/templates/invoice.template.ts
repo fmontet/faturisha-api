@@ -8,7 +8,7 @@ export function buildInvoiceHtml(
   logoDataUrl: string | null = null,
 ) {
   const { subtotal, tax, total } = totals;
-  const { escapeHtml, formatCurrency } = utils;
+  const { escapeHtml, formatCurrency, formatAddress } = utils;
 
   const e = escapeHtml;
   const fmt = formatCurrency;
@@ -147,14 +147,14 @@ export function buildInvoiceHtml(
           <div class="parties">
             <div>
               <div class="section-title">Seller</div>
-              <div>${e(dto.sellerName)}</div>
+              ${formatAddress(dto.buyerName, dto.buyerAddress)}
             </div>
 
             <br/>
 
             <div>
               <div class="section-title">Bill To</div>
-              <div>${e(dto.buyerName)}</div>
+              ${formatAddress(dto.buyerName, dto.buyerAddress)}
             </div>
           </div>
 
