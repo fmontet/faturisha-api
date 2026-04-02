@@ -9,12 +9,18 @@ import {
 import express from 'express';
 import { ReceiptsService } from './receipts.service';
 import { CreateReceiptDto } from './dto/create-receipt.dto';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
+@ApiTags('Receipts')
 @Controller('receipts')
 export class ReceiptsController {
   constructor(private readonly receiptsService: ReceiptsService) {}
 
   @Post()
+  @ApiOperation({ summary: 'Generate a PDF receipt' })
+  @ApiResponse({ status: 201, description: 'Receipt generated successfully' })
+  @ApiResponse({ status: 400, description: 'Validation error' })
+  @ApiResponse({ status: 500, description: 'Failed to generate receipt' })
   async create(@Body() dto: CreateReceiptDto, @Res() res: express.Response) {
     try {
       const { pdfBuffer } = await this.receiptsService.generateReceipt(dto);

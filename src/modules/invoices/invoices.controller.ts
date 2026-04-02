@@ -9,12 +9,18 @@ import {
 import express from 'express';
 import { InvoicesService } from './invoices.service';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
+@ApiTags('Invoices')
 @Controller('invoices')
 export class InvoicesController {
   constructor(private readonly invoicesService: InvoicesService) {}
 
   @Post()
+  @ApiOperation({ summary: 'Generate a PDF invoice' })
+  @ApiResponse({ status: 201, description: 'Invoice generated successfully' })
+  @ApiResponse({ status: 400, description: 'Validation error' })
+  @ApiResponse({ status: 500, description: 'Failed to generate invoice' })
   async create(@Body() dto: CreateInvoiceDto, @Res() res: express.Response) {
     try {
       const { pdfBuffer } = await this.invoicesService.generateInvoice(dto);

@@ -1,4 +1,8 @@
-# 📄 Faturisha API
+<p align="center">
+  <img src="src/assets/sample-logo.png" width="120" alt="Faturisha Logo" />
+</p>
+
+# Faturisha API
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A lightweight NestJS API for generating professional PDF invoices and receipts. No database required — pass in your data, get back a PDF.
@@ -51,6 +55,19 @@ pnpm start:prod
 ```bash
 pnpm test
 ```
+
+---
+
+## Documentation
+
+Once running, two interactive API documentation interfaces are available:
+
+| Interface | URL | Best for |
+|---|---|---|
+| Swagger UI | `http://localhost:3000/api/docs` | Development & testing |
+| Redoc | `http://localhost:3000/api/redoc` | Reading & sharing |
+| OpenAPI JSON | `http://localhost:3000/api/docs-json` | Importing into Postman or generating client SDKs |
+Place 
 
 ---
 
