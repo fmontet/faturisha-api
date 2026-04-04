@@ -7,10 +7,11 @@ import { InvoicesController } from './modules/invoices/invoices.controller';
 import { InvoicesService } from './modules/invoices/invoices.service';
 import { DocumentsService } from './modules/documents/documents.service';
 import { DocumentsModule } from './modules/documents/documents.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [InvoicesModule, ReceiptsModule, DocumentsModule],
-  controllers: [InvoicesController, ReceiptsController],
+  controllers: [InvoicesController, ReceiptsController, AppController],
   providers: [InvoicesService, ReceiptsService, DocumentsService],
 })
 export class AppModule {}
