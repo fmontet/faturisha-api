@@ -35,7 +35,11 @@ async function bootstrap() {
     logger: ['error', 'warn', 'log'],
   });
 
-  app.setGlobalPrefix('api/v1'); // optional: versioned prefix for all routes
+  app.setGlobalPrefix('api');
+  // app.enableVersioning({
+  //   type: VersioningType.URI, // results in /api/v1/..., /api/v2/...
+  //   defaultVersion: '1',
+  // });
 
   // Enable validation globally
   app.useGlobalPipes(
