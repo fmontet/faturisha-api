@@ -73,13 +73,13 @@ Place
 
 ## API Endpoints
 
-All endpoints are prefixed with `/api/v1`.
+All endpoints are prefixed with `/api`.
 
 ---
 
 ### Generate Invoice
 
-**`POST /api/v1/invoices`**
+**`POST /api/invoices`**
 
 Returns a PDF invoice as a binary file download.
 
@@ -143,7 +143,7 @@ Content-Disposition: attachment; filename=invoice-{timestamp}.pdf
 
 ### Generate Receipt
 
-**`POST /api/v1/receipts`**
+**`POST /api/receipts`**
 
 Returns a PDF receipt as a binary file download.
 
