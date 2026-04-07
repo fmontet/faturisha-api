@@ -5,6 +5,7 @@ import {
   Res,
   HttpException,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import express from 'express';
 import { InvoicesService } from './invoices.service';
@@ -14,6 +15,7 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 @ApiTags('Invoices')
 @Controller('invoices')
 export class InvoicesController {
+  private readonly logger = new Logger(InvoicesController.name);
   constructor(private readonly invoicesService: InvoicesService) {}
 
   @Post()
@@ -33,7 +35,7 @@ export class InvoicesController {
 
       res.end(pdfBuffer, 'binary');
     } catch (error) {
-      console.error('Invoice generation failed:', error);
+      this.logger.error('Invoice generation failed:', error);
       throw new HttpException(
         'Failed to generate invoice',
         HttpStatus.INTERNAL_SERVER_ERROR,

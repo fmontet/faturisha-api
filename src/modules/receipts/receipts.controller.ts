@@ -5,6 +5,7 @@ import {
   Res,
   HttpException,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import express from 'express';
 import { ReceiptsService } from './receipts.service';
@@ -14,6 +15,7 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 @ApiTags('Receipts')
 @Controller('receipts')
 export class ReceiptsController {
+  private readonly logger = new Logger(ReceiptsController.name);
   constructor(private readonly receiptsService: ReceiptsService) {}
 
   @Post()
@@ -33,7 +35,7 @@ export class ReceiptsController {
 
       res.end(pdfBuffer, 'binary');
     } catch (error) {
-      console.error('Receipt generation failed:', error);
+      this.logger.error('Receipt generation failed:', error);
       throw new HttpException(
         'Failed to generate receipt',
         HttpStatus.INTERNAL_SERVER_ERROR,

@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication, Logger, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 
@@ -31,6 +31,7 @@ function setupRedoc(app: INestApplication) {
 }
 
 async function bootstrap() {
+  const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule, {
     logger: ['error', 'warn', 'log'],
   });
@@ -81,10 +82,11 @@ async function bootstrap() {
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
-  console.log(`Server running on http://localhost:${port}`);
+  logger.log(`Server running on http://localhost:${port}`);
 }
 
 bootstrap().catch((err) => {
+  // eslint-disable-next-line no-console
   console.error('Fatal error during bootstrap', err);
   process.exit(1);
 });
