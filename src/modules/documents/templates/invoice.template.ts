@@ -175,6 +175,7 @@ export function buildInvoiceHtml(
                   const itemTax =
                     // eslint-disable-next-line prettier/prettier
                     Math.round(((itemSubtotal * dto.taxRate) / 100) * 100) / 100;
+                  const lineTotal = itemSubtotal + itemTax;
 
                   return `
                     <tr>
@@ -182,7 +183,7 @@ export function buildInvoiceHtml(
                       <td class="right">${i.qty}</td>
                       <td class="right">${fmt(i.price, dto.currency)}</td>
                       <td class="right">${fmt(itemTax, dto.currency)}</td>
-                      <td class="right">${fmt(itemSubtotal, dto.currency)}</td>
+                      <td class="right">${fmt(lineTotal, dto.currency)}</td>
                     </tr>
                   `;
                 })
