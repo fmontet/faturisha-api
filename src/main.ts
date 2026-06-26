@@ -2,7 +2,19 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { INestApplication, Logger, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import type { Request, Response } from 'express';
+import express, { type Request, type Response } from 'express';
+import {
+  API_KEY_HEADER,
+  PROTECTED_PDF_ROUTES,
+  createApiKeyMiddleware,
+  createRateLimitMiddleware,
+  getCorsOrigin,
+  parsePositiveInteger,
+} from './common/security';
+
+const DEFAULT_BODY_LIMIT = '1mb';
+const DEFAULT_RATE_LIMIT_MAX = 30;
+const DEFAULT_RATE_LIMIT_WINDOW_MS = 60_000;
 
 function setupRedoc(app: INestApplication) {
   const redocHtml = `
@@ -34,6 +46,7 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule, {
     logger: ['error', 'warn', 'log'],
+    bodyParser: false,
   });
 
   app.setGlobalPrefix('api');
@@ -41,6 +54,30 @@ async function bootstrap() {
   //   type: VersioningType.URI, // results in /api/v1/..., /api/v2/...
   //   defaultVersion: '1',
   // });
+
+  const bodyLimit = process.env.BODY_LIMIT ?? DEFAULT_BODY_LIMIT;
+  const rateLimitMax = parsePositiveInteger(
+    process.env.RATE_LIMIT_MAX,
+    DEFAULT_RATE_LIMIT_MAX,
+  );
+  const rateLimitWindowMs = parsePositiveInteger(
+    process.env.RATE_LIMIT_WINDOW_MS,
+    DEFAULT_RATE_LIMIT_WINDOW_MS,
+  );
+
+  app.enableCors({
+    origin: getCorsOrigin(process.env.ALLOWED_ORIGINS),
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', API_KEY_HEADER],
+  });
+
+  app.use(
+    PROTECTED_PDF_ROUTES,
+    createRateLimitMiddleware(rateLimitMax, rateLimitWindowMs),
+  );
+  app.use(PROTECTED_PDF_ROUTES, createApiKeyMiddleware(process.env.API_KEY));
+  app.use(express.json({ limit: bodyLimit }));
+  app.use(express.urlencoded({ extended: true, limit: bodyLimit }));
 
   // Enable validation globally
   app.useGlobalPipes(
@@ -51,20 +88,21 @@ async function bootstrap() {
     }),
   );
 
-  // Optional: enable CORS (useful for frontend later)
-  app.enableCors();
-  // app.enableCors({
-  //   origin: process.env.ALLOWED_ORIGINS?.split(',') ?? 'http://localhost:3000',
-  //   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-  //   credentials: true,
-  // });
-
   app.enableShutdownHooks(); // for graceful shutdown
 
   const config = new DocumentBuilder()
     .setTitle('Faturisha API')
     .setDescription('Generate PDF invoices and receipts')
     .setVersion('1.0')
+    .addApiKey(
+      {
+        type: 'apiKey',
+        name: API_KEY_HEADER,
+        in: 'header',
+        description: 'Required when API_KEY is configured on the server',
+      },
+      'apiKey',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

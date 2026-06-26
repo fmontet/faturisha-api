@@ -10,9 +10,15 @@ import {
 import express from 'express';
 import { InvoicesService } from './invoices.service';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiResponse,
+  ApiSecurity,
+  ApiTags,
+} from '@nestjs/swagger';
 
 @ApiTags('Invoices')
+@ApiSecurity('apiKey')
 @Controller('invoices')
 export class InvoicesController {
   private readonly logger = new Logger(InvoicesController.name);
@@ -22,6 +28,8 @@ export class InvoicesController {
   @ApiOperation({ summary: 'Generate a PDF invoice' })
   @ApiResponse({ status: 201, description: 'Invoice generated successfully' })
   @ApiResponse({ status: 400, description: 'Validation error' })
+  @ApiResponse({ status: 401, description: 'Missing or invalid API key' })
+  @ApiResponse({ status: 429, description: 'Too many requests' })
   @ApiResponse({ status: 500, description: 'Failed to generate invoice' })
   async create(@Body() dto: CreateInvoiceDto, @Res() res: express.Response) {
     try {

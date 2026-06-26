@@ -10,9 +10,15 @@ import {
 import express from 'express';
 import { ReceiptsService } from './receipts.service';
 import { CreateReceiptDto } from './dto/create-receipt.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiResponse,
+  ApiSecurity,
+  ApiTags,
+} from '@nestjs/swagger';
 
 @ApiTags('Receipts')
+@ApiSecurity('apiKey')
 @Controller('receipts')
 export class ReceiptsController {
   private readonly logger = new Logger(ReceiptsController.name);
@@ -22,6 +28,8 @@ export class ReceiptsController {
   @ApiOperation({ summary: 'Generate a PDF receipt' })
   @ApiResponse({ status: 201, description: 'Receipt generated successfully' })
   @ApiResponse({ status: 400, description: 'Validation error' })
+  @ApiResponse({ status: 401, description: 'Missing or invalid API key' })
+  @ApiResponse({ status: 429, description: 'Too many requests' })
   @ApiResponse({ status: 500, description: 'Failed to generate receipt' })
   async create(@Body() dto: CreateReceiptDto, @Res() res: express.Response) {
     try {
