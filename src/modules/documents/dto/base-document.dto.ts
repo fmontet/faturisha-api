@@ -6,67 +6,98 @@ import {
   IsPositive,
   ValidateNested,
   ArrayMinSize,
+  ArrayMaxSize,
   Min,
   Max,
-  Length,
   IsOptional,
+  MaxLength,
+  IsISO4217CurrencyCode,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
+const MAX_ORG_NAME_LENGTH = 120;
+const MAX_ADDRESS_LINE_LENGTH = 160;
+const MAX_CITY_LENGTH = 80;
+const MAX_COUNTRY_LENGTH = 80;
+const MAX_POSTAL_CODE_LENGTH = 10;
+const MAX_ITEM_NAME_LENGTH = 160;
+const MAX_LINE_ITEMS = 100;
+const MAX_ITEM_QUANTITY = 1_000_000;
+const MAX_ITEM_UNIT_PRICE = 1_000_000_000;
+
 export class AddressDto {
-  @ApiProperty({ example: '123 Farm Road' })
+  @ApiProperty({ example: '123 Farm Road', maxLength: MAX_ADDRESS_LINE_LENGTH })
   @IsString()
   @IsNotEmpty()
+  @MaxLength(MAX_ADDRESS_LINE_LENGTH)
   addressLine1!: string;
 
-  @ApiPropertyOptional({ example: 'Gate 5' })
+  @ApiPropertyOptional({
+    example: 'Gate 5',
+    maxLength: MAX_ADDRESS_LINE_LENGTH,
+  })
   @IsString()
   @IsOptional()
+  @MaxLength(MAX_ADDRESS_LINE_LENGTH)
   addressLine2?: string;
 
-  @ApiProperty({ example: 'Nairobi' })
+  @ApiProperty({ example: 'Nairobi', maxLength: MAX_CITY_LENGTH })
   @IsString()
   @IsNotEmpty()
+  @MaxLength(MAX_CITY_LENGTH)
   city!: string;
 
-  @ApiPropertyOptional({ example: 'Nairobi County' })
+  @ApiPropertyOptional({
+    example: 'Nairobi County',
+    maxLength: MAX_CITY_LENGTH,
+  })
   @IsString()
   @IsOptional()
+  @MaxLength(MAX_CITY_LENGTH)
   state?: string;
 
-  @ApiProperty({ example: 'Kenya' })
+  @ApiProperty({ example: 'Kenya', maxLength: MAX_COUNTRY_LENGTH })
   @IsString()
   @IsNotEmpty()
+  @MaxLength(MAX_COUNTRY_LENGTH)
   country!: string;
 
-  @ApiPropertyOptional({ example: '00100' })
+  @ApiPropertyOptional({ example: '00100', maxLength: MAX_POSTAL_CODE_LENGTH })
   @IsString()
   @IsOptional()
+  @MaxLength(MAX_POSTAL_CODE_LENGTH)
   postalCode?: string;
 }
 
 export class ItemDto {
-  @ApiProperty({ example: 'Grade 1A' })
+  @ApiProperty({ example: 'Grade 1A', maxLength: MAX_ITEM_NAME_LENGTH })
   @IsString()
   @IsNotEmpty()
+  @MaxLength(MAX_ITEM_NAME_LENGTH)
   name!: string;
 
-  @ApiProperty({ example: 100 })
+  @ApiProperty({ example: 100, maximum: MAX_ITEM_QUANTITY })
   @IsNumber()
   @IsPositive()
+  @Max(MAX_ITEM_QUANTITY)
   qty!: number;
 
-  @ApiProperty({ example: 120.75 })
+  @ApiProperty({ example: 120.75, maximum: MAX_ITEM_UNIT_PRICE })
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
+  @Max(MAX_ITEM_UNIT_PRICE)
   price!: number;
 }
 
 export class BaseDocumentDto {
-  @ApiProperty({ example: 'Some Farm Limited' })
+  @ApiProperty({
+    example: 'Some Farm Limited',
+    maxLength: MAX_ORG_NAME_LENGTH,
+  })
   @IsString()
   @IsNotEmpty()
+  @MaxLength(MAX_ORG_NAME_LENGTH)
   sellerName!: string;
 
   @ApiPropertyOptional({ type: AddressDto })
@@ -75,9 +106,10 @@ export class BaseDocumentDto {
   @Type(() => AddressDto)
   sellerAddress?: AddressDto;
 
-  @ApiProperty({ example: 'Green Limited' })
+  @ApiProperty({ example: 'Green Limited', maxLength: MAX_ORG_NAME_LENGTH })
   @IsString()
   @IsNotEmpty()
+  @MaxLength(MAX_ORG_NAME_LENGTH)
   buyerName!: string;
 
   @ApiPropertyOptional({ type: AddressDto })
@@ -92,16 +124,20 @@ export class BaseDocumentDto {
   @Max(100)
   taxRate!: number;
 
-  @ApiProperty({ type: [ItemDto] })
+  @ApiProperty({ type: [ItemDto], maxItems: MAX_LINE_ITEMS })
   @IsArray()
   @ArrayMinSize(1)
+  @ArrayMaxSize(MAX_LINE_ITEMS)
   @ValidateNested({ each: true })
   @Type(() => ItemDto)
   items!: ItemDto[];
 
   @ApiProperty({ example: 'KES', description: 'ISO 4217 currency code' })
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? value.trim().toUpperCase() : value,
+  )
   @IsString()
   @IsNotEmpty()
-  @Length(3, 3) // ISO 4217 currency codes are always 3 chars e.g. USD, KES, EUR
+  @IsISO4217CurrencyCode()
   currency!: string;
 }
