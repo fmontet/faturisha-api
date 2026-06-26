@@ -24,7 +24,7 @@ A lightweight NestJS API for generating professional PDF invoices and receipts. 
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 20+
 - pnpm
 
 ### Installation
@@ -189,17 +189,25 @@ src/
     invoices/
       dto/
       invoices.controller.ts
+      invoices.module.ts
       invoices.service.ts
     receipts/
       dto/
       receipts.controller.ts
+      receipts.module.ts
       receipts.service.ts
     documents/
+      dto/
       templates/
         invoice.template.ts
         receipt.template.ts
       definitions.ts
+      documents.module.ts
       documents.service.ts
+  app.controller.ts
+  app.module.ts
+  main.ts
+test/
 ```
 
 <!-- ---
