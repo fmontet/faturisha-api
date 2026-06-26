@@ -44,10 +44,16 @@ export class ReceiptsController {
       res.end(pdfBuffer, 'binary');
     } catch (error) {
       this.logger.error('Receipt generation failed:', error);
-      throw new HttpException(
-        'Failed to generate receipt',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      const status =
+        error instanceof HttpException
+          ? error.getStatus()
+          : HttpStatus.INTERNAL_SERVER_ERROR;
+      const message =
+        error instanceof HttpException
+          ? error.message
+          : 'Failed to generate receipt';
+
+      throw new HttpException(message, status);
     }
   }
 }
