@@ -1,6 +1,6 @@
 {
   "name": "faturisha-api",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "Faturisha API for generating PDF invoices and receipts",
   "author": "Francis Montet",
   "private": false,
