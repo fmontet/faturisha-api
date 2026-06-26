@@ -147,7 +147,7 @@ export function buildInvoiceHtml(
           <div class="parties">
             <div>
               <div class="section-title">Seller</div>
-              ${formatAddress(dto.buyerName, dto.buyerAddress)}
+              ${formatAddress(dto.sellerName, dto.sellerAddress)}
             </div>
 
             <br/>
