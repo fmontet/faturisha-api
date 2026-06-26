@@ -18,7 +18,7 @@ export class AddressDto {
   @ApiProperty({ example: '123 Farm Road' })
   @IsString()
   @IsNotEmpty()
-  addressLine1: string;
+  addressLine1!: string;
 
   @ApiPropertyOptional({ example: 'Gate 5' })
   @IsString()
@@ -28,7 +28,7 @@ export class AddressDto {
   @ApiProperty({ example: 'Nairobi' })
   @IsString()
   @IsNotEmpty()
-  city: string;
+  city!: string;
 
   @ApiPropertyOptional({ example: 'Nairobi County' })
   @IsString()
@@ -38,7 +38,7 @@ export class AddressDto {
   @ApiProperty({ example: 'Kenya' })
   @IsString()
   @IsNotEmpty()
-  country: string;
+  country!: string;
 
   @ApiPropertyOptional({ example: '00100' })
   @IsString()
@@ -50,24 +50,24 @@ export class ItemDto {
   @ApiProperty({ example: 'Grade 1A' })
   @IsString()
   @IsNotEmpty()
-  name: string;
+  name!: string;
 
   @ApiProperty({ example: 100 })
   @IsNumber()
   @IsPositive()
-  qty: number;
+  qty!: number;
 
   @ApiProperty({ example: 120.75 })
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
-  price: number;
+  price!: number;
 }
 
 export class BaseDocumentDto {
   @ApiProperty({ example: 'Some Farm Limited' })
   @IsString()
   @IsNotEmpty()
-  sellerName: string;
+  sellerName!: string;
 
   @ApiPropertyOptional({ type: AddressDto })
   @IsOptional()
@@ -78,7 +78,7 @@ export class BaseDocumentDto {
   @ApiProperty({ example: 'Green Limited' })
   @IsString()
   @IsNotEmpty()
-  buyerName: string;
+  buyerName!: string;
 
   @ApiPropertyOptional({ type: AddressDto })
   @IsOptional()
@@ -90,18 +90,18 @@ export class BaseDocumentDto {
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
   @Max(100)
-  taxRate: number;
+  taxRate!: number;
 
   @ApiProperty({ type: [ItemDto] })
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
   @Type(() => ItemDto)
-  items: ItemDto[];
+  items!: ItemDto[];
 
   @ApiProperty({ example: 'KES', description: 'ISO 4217 currency code' })
   @IsString()
   @IsNotEmpty()
   @Length(3, 3) // ISO 4217 currency codes are always 3 chars e.g. USD, KES, EUR
-  currency: string;
+  currency!: string;
 }
