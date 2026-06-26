@@ -12,6 +12,7 @@ import {
   IsOptional,
   MaxLength,
   IsISO4217CurrencyCode,
+  IsUrl,
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
@@ -25,6 +26,7 @@ const MAX_ITEM_NAME_LENGTH = 160;
 const MAX_LINE_ITEMS = 100;
 const MAX_ITEM_QUANTITY = 1_000_000;
 const MAX_ITEM_UNIT_PRICE = 1_000_000_000;
+const MAX_LOGO_URL_LENGTH = 2048;
 
 export class AddressDto {
   @ApiProperty({ example: '123 Farm Road', maxLength: MAX_ADDRESS_LINE_LENGTH })
@@ -140,4 +142,18 @@ export class BaseDocumentDto {
   @IsNotEmpty()
   @IsISO4217CurrencyCode()
   currency!: string;
+
+  @ApiPropertyOptional({
+    example: 'https://example.com/logo.png',
+    description:
+      'HTTPS URL for a PNG, JPEG, or WebP logo to display on the generated document',
+    maxLength: MAX_LOGO_URL_LENGTH,
+  })
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
+  @IsOptional()
+  @IsUrl({ protocols: ['https'], require_protocol: true })
+  @MaxLength(MAX_LOGO_URL_LENGTH)
+  logoUrl?: string;
 }
