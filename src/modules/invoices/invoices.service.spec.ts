@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { InvoicesService } from './invoices.service';
 import { DocumentsService } from '../documents/documents.service';
 import { createTemplateUtils } from '../documents/definitions';
+import { LogoService } from '../documents/logo.service';
 
 const mockEscapeHtml = (s: string) => s;
 const mockFormatCurrency = (n: number, currency: string) => `${currency} ${n}`;
@@ -13,6 +14,10 @@ const mockDocumentsService = {
   utils: createTemplateUtils(mockEscapeHtml, mockFormatCurrency),
 };
 
+const mockLogoService = {
+  resolveLogoDataUrl: jest.fn(),
+};
+
 describe('InvoicesService', () => {
   let service: InvoicesService;
 
@@ -21,6 +26,7 @@ describe('InvoicesService', () => {
       providers: [
         InvoicesService,
         { provide: DocumentsService, useValue: mockDocumentsService },
+        { provide: LogoService, useValue: mockLogoService },
       ],
     }).compile();
 
@@ -38,6 +44,9 @@ describe('InvoicesService', () => {
       const mockBuffer = Buffer.from('pdf');
 
       mockDocumentsService.calculateTotals.mockReturnValue(mockTotals);
+      mockLogoService.resolveLogoDataUrl.mockResolvedValue(
+        'data:image/png;base64,logo',
+      );
       mockDocumentsService.generatePdf.mockResolvedValue(mockBuffer);
 
       const dto = {
@@ -60,6 +69,9 @@ describe('InvoicesService', () => {
       expect(mockDocumentsService.calculateTotals).toHaveBeenCalledWith(
         dto.items,
         dto.taxRate,
+      );
+      expect(mockLogoService.resolveLogoDataUrl).toHaveBeenCalledWith(
+        undefined,
       );
       expect(mockDocumentsService.generatePdf).toHaveBeenCalled();
     });

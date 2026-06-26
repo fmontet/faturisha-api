@@ -74,15 +74,17 @@ Once running, two interactive API documentation interfaces are available:
 
 All runtime configuration is read from environment variables. Use `.env.example` as a template for local or hosted environment configuration. If you copy it to `.env`, make sure your shell, hosting platform, or process manager loads it before starting the API.
 
-| Variable               | Default  | Description                                               |
-| ---------------------- | -------- | --------------------------------------------------------- |
-| `PORT`                 | `3000`   | HTTP port used by the API                                 |
-| `LOCALE`               | `en-US`  | Locale used for currency formatting                       |
-| `BODY_LIMIT`           | `1mb`    | Maximum JSON request body size                            |
-| `ALLOWED_ORIGINS`      | disabled | Comma-separated CORS origins, or `*` to allow all origins |
-| `RATE_LIMIT_MAX`       | `30`     | Maximum PDF generation requests per client per window     |
-| `RATE_LIMIT_WINDOW_MS` | `60000`  | Rate-limit window in milliseconds                         |
-| `API_KEY`              | unset    | Optional API key for PDF generation endpoints             |
+| Variable                | Default  | Description                                               |
+| ----------------------- | -------- | --------------------------------------------------------- |
+| `PORT`                  | `3000`   | HTTP port used by the API                                 |
+| `LOCALE`                | `en-US`  | Locale used for currency formatting                       |
+| `BODY_LIMIT`            | `1mb`    | Maximum JSON request body size                            |
+| `LOGO_FETCH_TIMEOUT_MS` | `3000`   | Timeout for fetching a remote document logo               |
+| `LOGO_MAX_BYTES`        | `524288` | Maximum remote logo size in bytes                         |
+| `ALLOWED_ORIGINS`       | disabled | Comma-separated CORS origins, or `*` to allow all origins |
+| `RATE_LIMIT_MAX`        | `30`     | Maximum PDF generation requests per client per window     |
+| `RATE_LIMIT_WINDOW_MS`  | `60000`  | Rate-limit window in milliseconds                         |
+| `API_KEY`               | unset    | Optional API key for PDF generation endpoints             |
 
 Example:
 
@@ -90,6 +92,8 @@ Example:
 PORT=3000 \
 LOCALE=en-KE \
 BODY_LIMIT=1mb \
+LOGO_FETCH_TIMEOUT_MS=3000 \
+LOGO_MAX_BYTES=524288 \
 ALLOWED_ORIGINS=https://app.example.com \
 RATE_LIMIT_MAX=30 \
 RATE_LIMIT_WINDOW_MS=60000 \
@@ -101,7 +105,7 @@ pnpm start:prod
 
 ## Security
 
-Faturisha does not prescribe a user or account model. For production deployments, place the API behind your own authentication layer, API gateway, or reverse proxy.
+The API does not prescribe a user or account model. For production deployments, place the API behind your own authentication layer, API gateway, or reverse proxy.
 
 The API includes baseline deploy-safe guardrails:
 
@@ -109,6 +113,7 @@ The API includes baseline deploy-safe guardrails:
 - JSON request bodies are limited by `BODY_LIMIT`.
 - PDF generation endpoints are rate-limited with `RATE_LIMIT_MAX` and `RATE_LIMIT_WINDOW_MS`.
 - If `API_KEY` is set, `POST /api/invoices` and `POST /api/receipts` require the `x-api-key` header.
+- Remote document logos must use HTTPS, cannot redirect, must be PNG, JPEG, or WebP, and are limited by `LOGO_FETCH_TIMEOUT_MS` and `LOGO_MAX_BYTES`.
 
 The built-in rate limiter is in-memory and applies per running API process. For multi-instance production deployments, use an API gateway, reverse proxy, or platform-level rate limiting as the primary control.
 
@@ -155,6 +160,7 @@ Returns a PDF invoice as a binary file download.
   },
   "taxRate": 16,
   "currency": "KES",
+  "logoUrl": "https://example.com/logo.png",
   "items": [
     { "name": "Grade 1A", "qty": 4000, "price": 120.0 },
     { "name": "Grade 1B", "qty": 3000, "price": 100.0 }
@@ -164,15 +170,16 @@ Returns a PDF invoice as a binary file download.
 
 #### Fields
 
-| Field           | Type   | Required | Description                                     |
-| --------------- | ------ | -------- | ----------------------------------------------- |
-| `sellerName`    | string | ✅       | Name of the seller                              |
-| `sellerAddress` | object | ❌       | Seller address (see Address fields)             |
-| `buyerName`     | string | ✅       | Name of the buyer                               |
-| `buyerAddress`  | object | ❌       | Buyer address (see Address fields)              |
-| `taxRate`       | number | ✅       | Tax rate as a percentage (0–100)                |
-| `currency`      | string | ✅       | ISO 4217 currency code e.g. `KES`, `USD`, `EUR` |
-| `items`         | array  | ✅       | Line items. At least one item required          |
+| Field           | Type   | Required | Description                                      |
+| --------------- | ------ | -------- | ------------------------------------------------ |
+| `sellerName`    | string | ✅       | Name of the seller                               |
+| `sellerAddress` | object | ❌       | Seller address (see Address fields)              |
+| `buyerName`     | string | ✅       | Name of the buyer                                |
+| `buyerAddress`  | object | ❌       | Buyer address (see Address fields)               |
+| `taxRate`       | number | ✅       | Tax rate as a percentage (0–100)                 |
+| `currency`      | string | ✅       | ISO 4217 currency code e.g. `KES`, `USD`, `EUR`  |
+| `logoUrl`       | string | ❌       | HTTPS URL for a PNG, JPEG, or WebP document logo |
+| `items`         | array  | ✅       | Line items. At least one item required           |
 
 #### Address Fields
 
@@ -192,6 +199,8 @@ Returns a PDF invoice as a binary file download.
 | `name`  | string | ✅       | Line item name or description               |
 | `qty`   | number | ✅       | Positive quantity                           |
 | `price` | number | ✅       | Unit price. Supports up to 2 decimal places |
+
+If `logoUrl` is provided, Faturisha fetches the image server-side and embeds it in the PDF as a data URL. If it is omitted, the bundled placeholder logo is used when available.
 
 #### Response
 
@@ -314,6 +323,7 @@ src/
       definitions.ts
       documents.module.ts
       documents.service.ts
+      logo.service.ts
   app.controller.ts
   app.module.ts
   main.ts
