@@ -72,6 +72,8 @@ Once running, two interactive API documentation interfaces are available:
 
 ## Configuration
 
+All runtime configuration is read from environment variables. Use `.env.example` as a template for local or hosted environment configuration. If you copy it to `.env`, make sure your shell, hosting platform, or process manager loads it before starting the API.
+
 | Variable               | Default  | Description                                               |
 | ---------------------- | -------- | --------------------------------------------------------- |
 | `PORT`                 | `3000`   | HTTP port used by the API                                 |
